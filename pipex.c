@@ -11,20 +11,23 @@
 
 #include "pipex.h"
 
-char *get_path(char *envp[])
+char	**get_path(char *envp[])
 {
-	char	*path;
 	int		i;
+	char	*path;
+	char	**split_path;
 
 	i = 0;
 	while (envp[i])
 	{
 		if (strncmp("PATH=", envp[i], 5) == 0)
 		{
-			path = ft_substr(envp[i], 5, ft_strlen(envp[i]) - 5);
+			path = ft_strdup(envp[i] + 5);
 			if (!path)
 				return (NULL);
-			return (path);
+			split_path = ft_split((const char *)path, ':');
+			free (path);
+			return (split_path);
 		}
 		i++;
 	}
@@ -36,7 +39,13 @@ int main(int argc, char const *argv[], char *envp[])
 	(void)argv;
 	if (argc < 1)
 		return (1);
-	printf("%s\n", get_path(envp));
+	int	i = 0;
+	char **output = get_path(envp);
+	while (output[i])
+		printf("%s\n", output[i++]);
+	while (--i >= 0)
+		free (output[i]);
+	free (output);
 	return 0;
 }
 
