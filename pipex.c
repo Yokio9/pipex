@@ -11,11 +11,35 @@
 
 #include "pipex.h"
 
+char	**add_slash(char **split_path)
+{
+	int	i;
+	char	*temp;
+
+	i = -1;
+	while (split_path[++i])
+	{
+		temp = split_path[i];
+		split_path[i] = ft_strjoin(split_path[i], "/");
+		if (!split_path[i])
+		{
+			i = 0;
+			while (split_path[i])
+			{
+				free(split_path[i]);
+				i++;
+			}
+			return (NULL);
+		}
+		free (temp);
+	}
+	return (split_path);
+}
+
 char	**get_path(char *envp[])
 {
 	int		i;
 	char	**split_path;
-	char	*temp;
 
 	i = 0;
 	while (envp[i])
@@ -23,12 +47,12 @@ char	**get_path(char *envp[])
 		if (ft_strncmp("PATH=", envp[i], 5) == 0)
 		{
 			split_path = ft_split(envp[i] + 5, ':');
-			i = -1;
-			while (split_path[++i])
+			if (!split_path)
+				return (NULL);
+			if (add_slash(split_path) == NULL)
 			{
-				temp = split_path[i];
-				split_path[i] = ft_strjoin(split_path[i], "/");
-				free (temp);
+				free(split_path);
+				return (NULL);
 			}
 			return (split_path);
 		}
@@ -42,6 +66,11 @@ int	set_infile(char *infile)
 	int	open_check;
 	int	dup_check;
 
+	if (access(infile, R_OK) == -1)
+	{
+		perror("");
+		return (0);
+	}
 	open_check = open(infile, O_RDONLY);
 	if (open_check == -1)
 	{
@@ -58,7 +87,7 @@ int	set_infile(char *infile)
 	return (1);
 }
 
-int main(int argc, char *argv[], char *envp[])
+int	main(int argc, char *argv[], char *envp[])
 {
 	int		i;
 	char	**args;
@@ -72,7 +101,7 @@ int main(int argc, char *argv[], char *envp[])
 		return (1);
 	args = ft_split(argv[2], ' ');
 	if (!args)
-		exit(1);
+		return (1);
 	path_list = get_path(envp);
 	i = 0;
 	while(path_list[i])
@@ -88,12 +117,12 @@ int main(int argc, char *argv[], char *envp[])
 		free (args[i++]);
 	free (args);
 	exit(1);
+}
 /* 	while (path_list[i])
 		printf("%s\n", path_list[i++]);
 	while (--i >= 0)
 		free (path_list[i]);
 	free (path_list);*/
-}
 	//char *args[] = {"ls", "-l", NULL};
 
 	//settings set target.run-args ls
