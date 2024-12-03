@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   pipex.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: dimatayi <dimatayi@student.42lausanne.c    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/12/04 00:44:51 by dimatayi          #+#    #+#             */
+/*   Updated: 2024/12/04 00:52:43 by dimatayi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 //< file1 cmd1 | cmd2 > file2
 
 //		< infile ls -l | wc -l > outfile
@@ -27,7 +39,7 @@ int	free_double_ptr(char **args)
 
 char	**add_slash(char **split_path)
 {
-	int	i;
+	int		i;
 	char	*temp;
 
 	i = -1;
@@ -101,11 +113,30 @@ int	set_infile(char *infile)
 	return (1);
 }
 
+int	init(char **path_list, char **args, char *cmd1)
+{
+	int		i;
+	int		exec_check;
+	char	*full_path;
+
+	i = 0;
+	while (path_list[i])
+	{
+		full_path = ft_strjoin(path_list[i++], cmd1);
+		if (!full_path)
+			break ;
+		exec_check = execve(full_path, args, NULL);
+		free (full_path);
+	}
+	if (exec_check == -1)
+		perror("");
+	return (0);
+}
+
 int	main(int argc, char *argv[], char *envp[])
 {
 	int		i;
 	char	**args;
-	char	*full_path;
 	char	**path_list;
 
 	i = 0;
@@ -119,20 +150,10 @@ int	main(int argc, char *argv[], char *envp[])
 	path_list = get_path(envp);
 	if (!path_list)
 		return (free_double_ptr(args));
-	i = 0;
-	while(path_list[i])
-	{
-		full_path = ft_strjoin(path_list[i++], args[0]);
-		if (!full_path)
-			break;
-		execve(full_path, args, NULL);
-		free (full_path);
-	}
-	i = 0;
-	while (args[i])
-		free (args[i++]);
-	free (args);
-	exit(1);
+	i = init(path_list, args, args[0]);
+	free_double_ptr(args);
+	free_double_ptr(path_list);
+	return (i);
 }
 /* 	while (path_list[i])
 		printf("%s\n", path_list[i++]);
