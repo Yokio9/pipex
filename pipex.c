@@ -14,19 +14,22 @@
 char	**get_path(char *envp[])
 {
 	int		i;
-	char	*path;
 	char	**split_path;
+	char	*temp;
 
 	i = 0;
 	while (envp[i])
 	{
 		if (strncmp("PATH=", envp[i], 5) == 0)
 		{
-			path = ft_strdup(envp[i] + 5);
-			if (!path)
-				return (NULL);
-			split_path = ft_split((const char *)path, ':');
-			free (path);
+			split_path = ft_split(envp[i] + 5, ':');
+			i = -1;
+			while (split_path[++i])
+			{
+				temp = split_path[i];
+				split_path[i] = ft_strjoin(split_path[i], "/");
+				free (temp);
+			}
 			return (split_path);
 		}
 		i++;
@@ -34,26 +37,11 @@ char	**get_path(char *envp[])
 	return (NULL);
 }
 
-int main(int argc, char const *argv[], char *envp[])
-{
-	(void)argv;
-	if (argc < 1)
-		return (1);
-	int	i = 0;
-	char **output = get_path(envp);
-	while (output[i])
-		printf("%s\n", output[i++]);
-	while (--i >= 0)
-		free (output[i]);
-	free (output);
-	return 0;
-}
-
-
-/* int main(int argc, char *argv[], char *envp[])
+int main(int argc, char *argv[], char *envp[])
 {
 	int	i;
 	char	*full_path;
+	char	**path_list;
 
 	i = 0;
 	if (argc < 2)					//CHANGE THIS TO argc != 5
@@ -73,13 +61,19 @@ int main(int argc, char const *argv[], char *envp[])
 		}
 		i++;
 	}
-	const char *path_list[] = {"/usr/local/bin/", "/usr/bin/", "/bin/", "/sbin/", "/usr/sbin/", NULL};
+	path_list = get_path(envp);
+/* 	while (path_list[i])
+		printf("%s\n", path_list[i++]);
+	while (--i >= 0)
+		free (path_list[i]);
+	free (path_list);*/
 	i = 0;
 	while(path_list[i])
 	{
 		full_path = ft_strjoin(path_list[i++], args[0]);
 		if (!full_path)
 			break;
+		printf("%s\n", full_path);
 		execve(full_path, args, NULL);
 		free (full_path);
 	}
@@ -88,7 +82,7 @@ int main(int argc, char const *argv[], char *envp[])
 		free (args[i++]);
 	free (args);
 	exit(1);
-} */
+}
 	//char *args[] = {"ls", "-l", NULL};
 
 	//settings set target.run-args ls
