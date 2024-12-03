@@ -40,18 +40,29 @@ char	**get_path(char *envp[])
 int main(int argc, char *argv[], char *envp[])
 {
 	int	i;
+	int	open1;
+	int	infile;
 	char	*full_path;
 	char	**path_list;
 
 	i = 0;
 	if (argc < 2)					//CHANGE THIS TO argc != 5
 		return (0);
+	open1 = open(argv[1], O_RDONLY);
+	if (open1 < 0)
+	{
+		printf("cant open file\n");
+		return (1);
+	}
+	infile = dup2(open1, 0);
+	if (infile == -1)
+		return (1);
 	char **args = calloc(argc, sizeof(char *));
 	if (!args)
 		exit(1);
-	while (argv[i + 1])
+	while (argv[i + 2])			//2 bc 1 for argv[0] and 1 for the file
 	{
-		args[i] = strdup(argv[i + 1]);
+		args[i] = strdup(argv[i + 2]);
 		if (!args[i])
 		{
 			while (i > 0)
@@ -62,11 +73,6 @@ int main(int argc, char *argv[], char *envp[])
 		i++;
 	}
 	path_list = get_path(envp);
-/* 	while (path_list[i])
-		printf("%s\n", path_list[i++]);
-	while (--i >= 0)
-		free (path_list[i]);
-	free (path_list);*/
 	i = 0;
 	while(path_list[i])
 	{
@@ -82,6 +88,11 @@ int main(int argc, char *argv[], char *envp[])
 		free (args[i++]);
 	free (args);
 	exit(1);
+/* 	while (path_list[i])
+		printf("%s\n", path_list[i++]);
+	while (--i >= 0)
+		free (path_list[i]);
+	free (path_list);*/
 }
 	//char *args[] = {"ls", "-l", NULL};
 
