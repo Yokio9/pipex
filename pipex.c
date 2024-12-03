@@ -11,6 +11,20 @@
 
 #include "pipex.h"
 
+int	free_double_ptr(char **args)
+{
+	int	i;
+
+	i = 0;
+	while (args[i])
+	{
+		free(args[i]);
+		i++;
+	}
+	free(args);
+	return (1);
+}
+
 char	**add_slash(char **split_path)
 {
 	int	i;
@@ -103,6 +117,8 @@ int	main(int argc, char *argv[], char *envp[])
 	if (!args)
 		return (1);
 	path_list = get_path(envp);
+	if (!path_list)
+		return (free_double_ptr(args));
 	i = 0;
 	while(path_list[i])
 	{
