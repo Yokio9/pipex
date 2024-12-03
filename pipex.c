@@ -20,7 +20,7 @@ char	**get_path(char *envp[])
 	i = 0;
 	while (envp[i])
 	{
-		if (strncmp("PATH=", envp[i], 5) == 0)
+		if (ft_strncmp("PATH=", envp[i], 5) == 0)
 		{
 			split_path = ft_split(envp[i] + 5, ':');
 			i = -1;
@@ -37,41 +37,42 @@ char	**get_path(char *envp[])
 	return (NULL);
 }
 
+int	set_infile(char *infile)
+{
+	int	open_check;
+	int	dup_check;
+
+	open_check = open(infile, O_RDONLY);
+	if (open_check == -1)
+	{
+		perror("");
+		return (0);
+	}
+	dup_check = dup2(open_check, 0);
+	close(open_check);
+	if (dup_check == -1)
+	{
+		perror("");
+		return (0);
+	}
+	return (1);
+}
+
 int main(int argc, char *argv[], char *envp[])
 {
-	int	i;
-	int	open1;
-	int	infile;
+	int		i;
+	char	**args;
 	char	*full_path;
 	char	**path_list;
 
 	i = 0;
-	if (argc < 2)					//CHANGE THIS TO argc != 5
+	if (argc != 3)					//CHANGE THIS TO argc != 5
 		return (0);
-	open1 = open(argv[1], O_RDONLY);
-	if (open1 < 0)
-	{
-		printf("cant open file\n");
+	if (!set_infile(argv[1]))
 		return (1);
-	}
-	infile = dup2(open1, 0);
-	if (infile == -1)
-		return (1);
-	char **args = calloc(argc, sizeof(char *));
+	args = ft_split(argv[2], ' ');
 	if (!args)
 		exit(1);
-	while (argv[i + 2])			//2 bc 1 for argv[0] and 1 for the file
-	{
-		args[i] = strdup(argv[i + 2]);
-		if (!args[i])
-		{
-			while (i > 0)
-				free (args[--i]);
-			free (args);
-			exit(1);
-		}
-		i++;
-	}
 	path_list = get_path(envp);
 	i = 0;
 	while(path_list[i])
@@ -79,7 +80,6 @@ int main(int argc, char *argv[], char *envp[])
 		full_path = ft_strjoin(path_list[i++], args[0]);
 		if (!full_path)
 			break;
-		printf("%s\n", full_path);
 		execve(full_path, args, NULL);
 		free (full_path);
 	}

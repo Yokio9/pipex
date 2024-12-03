@@ -1,4 +1,4 @@
-SRCS = pipex.c
+SRCS = pipex.c ./libft/ft_calloc.c ./libft/ft_bzero.c ./libft/ft_memset.c ./libft/ft_strncmp.c
 OBJECTS = ${SRCS:.c=.o}
 HEADERS = pipex.h
 CC = gcc
