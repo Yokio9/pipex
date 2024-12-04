@@ -6,22 +6,17 @@
 /*   By: dimatayi <dimatayi@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 00:44:51 by dimatayi          #+#    #+#             */
-/*   Updated: 2024/12/04 00:52:43 by dimatayi         ###   ########.fr       */
+/*   Updated: 2024/12/04 02:47:42 by dimatayi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-//< file1 cmd1 | cmd2 > file2
-
-//		< infile ls -l | wc -l > outfile
-//./pipex infile "ls -l" "wc -l" outfile
-
-//		< infile grep a1 | wc -w > outfile
-//./pipex infile "grep a1" "wc -w" outfile
-
-//if argv[1] == "<"	-->	input = argv[2] else input = argv[1]
-//access(input)
-
 #include "pipex.h"
+
+int	return_perror()
+{
+	perror("");
+	return (1);
+}
 
 int	free_double_ptr(char **args)
 {
@@ -89,78 +84,79 @@ char	**get_path(char *envp[])
 
 int	set_infile(char *infile)
 {
-	int	open_check;
+	int	oldfile;
 	int	dup_check;
 
 	if (access(infile, R_OK) == -1)
-	{
-		perror("");
-		return (0);
-	}
-	open_check = open(infile, O_RDONLY);
-	if (open_check == -1)
-	{
-		perror("");
-		return (0);
-	}
-	dup_check = dup2(open_check, 0);
-	close(open_check);
+		return (return_perror());
+	oldfile = open(infile, O_RDONLY);
+	if (oldfile == -1)
+		return (return_perror());
+	dup_check = dup2(oldfile, 0);
+	close(oldfile);
 	if (dup_check == -1)
-	{
-		perror("");
-		return (0);
-	}
-	return (1);
+		return (return_perror());
+	return (0);
 }
 
-int	init(char **path_list, char **args, char *cmd1)
+int	child(char **path_list, char **args, char *infile)
 {
 	int		i;
 	int		exec_check;
 	char	*full_path;
 
 	i = 0;
+	if (set_infile(infile))
+		return (1);
 	while (path_list[i])
 	{
-		full_path = ft_strjoin(path_list[i++], cmd1);
+		full_path = ft_strjoin(path_list[i++], args[0]);
 		if (!full_path)
-			break ;
-		exec_check = execve(full_path, args, NULL);
+			return (1);
+		execve(full_path, args, NULL);
 		free (full_path);
 	}
-	if (exec_check == -1)
-		perror("");
+	return (return_perror());
+}
+
+int	init(char *argv[], char **in_args, char **out_args, char *envp[])
+{
+	int		pid;
+	int		fd[2];
+	char	**path_list;
+
+	if (pipe(fd) == -1)
+		return (return_perror());
+	path_list = get_path(envp);
+	if (!path_list)
+		return (1);
+	pid = fork();
+	if (fork == -1)
+		return (return_perror());
+	else if (pid == 0)
+		return (child(path_list, in_args, argv[1]));
+	else
+		parent(path_list, in_args, argv[1], pid);
 	return (0);
 }
 
 int	main(int argc, char *argv[], char *envp[])
 {
 	int		i;
-	char	**args;
-	char	**path_list;
+	char	**in_args;
+	char	**out_args;
 
 	i = 0;
-	if (argc != 3)					//CHANGE THIS TO argc != 5
+	if (argc != 5)
 		return (0);
-	if (!set_infile(argv[1]))
+	in_args = ft_split(argv[2], ' ');
+	if (!in_args)
 		return (1);
-	args = ft_split(argv[2], ' ');
-	if (!args)
-		return (1);
-	path_list = get_path(envp);
-	if (!path_list)
-		return (free_double_ptr(args));
-	i = init(path_list, args, args[0]);
-	free_double_ptr(args);
-	free_double_ptr(path_list);
+	out_args = ft_split(argv[3], ' ');
+	if (!out_args)
+		return (free_double_ptr(in_args));
+	i = init(argv, in_args, out_args, envp);
+	free_double_ptr(in_args);
+	free_double_ptr(out_args);
 	return (i);
 }
-/* 	while (path_list[i])
-		printf("%s\n", path_list[i++]);
-	while (--i >= 0)
-		free (path_list[i]);
-	free (path_list);*/
-	//char *args[] = {"ls", "-l", NULL};
-
-	//settings set target.run-args ls
-	//frame variable
