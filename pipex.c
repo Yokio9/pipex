@@ -6,108 +6,18 @@
 /*   By: dimatayi <dimatayi@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 00:44:51 by dimatayi          #+#    #+#             */
-/*   Updated: 2024/12/04 03:03:57 by dimatayi         ###   ########.fr       */
+/*   Updated: 2024/12/04 05:07:37 by dimatayi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-int	return_perror()
-{
-	perror("");
-	return (1);
-}
-
-int	free_double_ptr(char **args)
-{
-	int	i;
-
-	i = 0;
-	while (args[i])
-	{
-		free(args[i]);
-		i++;
-	}
-	free(args);
-	return (1);
-}
-
-char	**add_slash(char **split_path)
+int	exec(char **path_list, char **args)
 {
 	int		i;
-	char	*temp;
-
-	i = -1;
-	while (split_path[++i])
-	{
-		temp = split_path[i];
-		split_path[i] = ft_strjoin(split_path[i], "/");
-		if (!split_path[i])
-		{
-			i = 0;
-			while (split_path[i])
-			{
-				free(split_path[i]);
-				i++;
-			}
-			return (NULL);
-		}
-		free (temp);
-	}
-	return (split_path);
-}
-
-char	**get_path(char *envp[])
-{
-	int		i;
-	char	**split_path;
-
-	i = 0;
-	while (envp[i])
-	{
-		if (ft_strncmp("PATH=", envp[i], 5) == 0)
-		{
-			split_path = ft_split(envp[i] + 5, ':');
-			if (!split_path)
-				return (NULL);
-			if (add_slash(split_path) == NULL)
-			{
-				free(split_path);
-				return (NULL);
-			}
-			return (split_path);
-		}
-		i++;
-	}
-	return (NULL);
-}
-
-int	set_infile(char *infile)
-{
-	int	oldfile;
-	int	dup_check;
-
-	if (access(infile, R_OK) == -1)
-		return (return_perror());
-	oldfile = open(infile, O_RDONLY);
-	if (oldfile == -1)
-		return (return_perror());
-	dup_check = dup2(oldfile, 0);
-	close(oldfile);
-	if (dup_check == -1)
-		return (return_perror());
-	return (0);
-}
-
-int	child(char **path_list, char **args, char *infile)
-{
-	int		i;
-	int		exec_check;
 	char	*full_path;
 
 	i = 0;
-	if (set_infile(infile))
-		return (1);
 	while (path_list[i])
 	{
 		full_path = ft_strjoin(path_list[i++], args[0]);
@@ -119,6 +29,26 @@ int	child(char **path_list, char **args, char *infile)
 	return (return_perror());
 }
 
+int	child(char **path_list, char **in_args, char *infile, int fd[])
+{
+	close(fd[0]);
+	if (set_in_out_file(infile, 0))
+		return (1);
+	dup2(fd[1], 1);
+	close(fd[1]);
+	return (exec(path_list, in_args));
+}
+
+int	parent(char *path_list[], char **out_args, char *outfile, int fd[])
+{
+	close(fd[1]);
+	if (set_in_out_file(outfile, 1))
+		return (1);
+	dup2(fd[0], 0);
+	close(fd[0]);
+	return (exec(path_list, out_args));
+}
+
 int	init(char *argv[], char **in_args, char **out_args, char *path_list[])
 {
 	int		pid;
@@ -127,13 +57,12 @@ int	init(char *argv[], char **in_args, char **out_args, char *path_list[])
 	if (pipe(fd) == -1)
 		return (return_perror());
 	pid = fork();
-	if (fork == -1)
+	if (pid == -1)
 		return (return_perror());
 	else if (pid == 0)
-		return (child(path_list, in_args, argv[1]));
-	else
-		parent(path_list, in_args, argv[1], pid);
-	return (0);
+		return (child(path_list, in_args, argv[1], fd));
+	wait(NULL);
+	return (parent(path_list, out_args, argv[4], fd));
 }
 
 int	main(int argc, char *argv[], char *envp[])
