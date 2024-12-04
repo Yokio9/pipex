@@ -6,7 +6,7 @@
 /*   By: dimatayi <dimatayi@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 00:44:51 by dimatayi          #+#    #+#             */
-/*   Updated: 2024/12/04 02:47:42 by dimatayi         ###   ########.fr       */
+/*   Updated: 2024/12/04 03:03:57 by dimatayi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,17 +119,13 @@ int	child(char **path_list, char **args, char *infile)
 	return (return_perror());
 }
 
-int	init(char *argv[], char **in_args, char **out_args, char *envp[])
+int	init(char *argv[], char **in_args, char **out_args, char *path_list[])
 {
 	int		pid;
 	int		fd[2];
-	char	**path_list;
 
 	if (pipe(fd) == -1)
 		return (return_perror());
-	path_list = get_path(envp);
-	if (!path_list)
-		return (1);
 	pid = fork();
 	if (fork == -1)
 		return (return_perror());
@@ -145,18 +141,26 @@ int	main(int argc, char *argv[], char *envp[])
 	int		i;
 	char	**in_args;
 	char	**out_args;
+	char	**path_list;
 
 	i = 0;
 	if (argc != 5)
 		return (0);
+	path_list = get_path(envp);
+	if (!path_list)
+		return (1);
 	in_args = ft_split(argv[2], ' ');
 	if (!in_args)
-		return (1);
+		return (free_double_ptr(path_list));
 	out_args = ft_split(argv[3], ' ');
 	if (!out_args)
+	{
+		free_double_ptr(path_list);
 		return (free_double_ptr(in_args));
-	i = init(argv, in_args, out_args, envp);
+	}
+	i = init(argv, in_args, out_args, path_list);
 	free_double_ptr(in_args);
 	free_double_ptr(out_args);
+	free_double_ptr(path_list);
 	return (i);
 }
