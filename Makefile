@@ -2,8 +2,7 @@ SRCS = pipex.c pipex_utils.c ./libft/ft_calloc.c ./libft/ft_bzero.c ./libft/ft_m
 OBJECTS = ${SRCS:.c=.o}
 HEADERS = pipex.h
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror -g -fsanitize=address -I.
-LDFLAGS = -fsanitize=address
+CFLAGS = -Wall -Wextra -Werror -g -I.
 NAME = pipex
 LIBFT_PATH = ./libft
 LIBFT = $(LIBFT_PATH)/libft.a
@@ -14,7 +13,7 @@ $(LIBFT):
 	cd $(LIBFT_PATH) && make
 
 $(NAME): $(LIBFT) $(OBJECTS)
-	$(CC) $(OBJECTS) $(LIBFT) $(LDFLAGS) -o $(NAME)
+	$(CC) $(OBJECTS) $(LIBFT) -o $(NAME)
 
 .c.o:
 	$(CC) $(CFLAGS) -c $< -o $@

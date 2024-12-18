@@ -6,90 +6,72 @@
 /*   By: dimatayi <dimatayi@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 00:44:51 by dimatayi          #+#    #+#             */
-/*   Updated: 2024/12/04 05:07:37 by dimatayi         ###   ########.fr       */
+/*   Updated: 2024/12/18 04:40:01 by dimatayi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-int	exec(char **path_list, char **args)
+void	exec(char *cmd, char **envp)
 {
-	int		i;
+	char	**args;
 	char	*full_path;
 
-	i = 0;
-	while (path_list[i])
+	args = NULL;
+	full_path = NULL;
+	args = ft_split(cmd, ' ');
+	full_path = get_path(envp, args[0]);
+	if (!full_path)
 	{
-		full_path = ft_strjoin(path_list[i++], args[0]);
-		if (!full_path)
-			return (1);
-		execve(full_path, args, NULL);
-		free (full_path);
+		free_double_ptr(args);
+		exit (1);
 	}
-	return (return_perror());
+	execve(full_path, args, NULL);
+	free(full_path);
+	return_perror(1);
 }
 
-int	child(char **path_list, char **in_args, char *infile, int fd[])
+void	child(char **args, char **envp, int fd[])
 {
+	int	oldfile;
+
 	close(fd[0]);
-	if (set_in_out_file(infile, 0))
-		return (1);
+	oldfile = open(args[1], O_RDONLY, 0777);
+	dup2(oldfile, 0);
 	dup2(fd[1], 1);
 	close(fd[1]);
-	return (exec(path_list, in_args));
+	exec(args[2], envp);
 }
 
-int	parent(char *path_list[], char **out_args, char *outfile, int fd[])
+void	parent(char **args, char **envp, int fd[])
 {
+	int	oldfile;
+
 	close(fd[1]);
-	if (set_in_out_file(outfile, 1))
-		return (1);
+	oldfile = open(args[4], O_WRONLY | O_CREAT | O_TRUNC, 0777);
+	dup2(oldfile, 1);
 	dup2(fd[0], 0);
 	close(fd[0]);
-	return (exec(path_list, out_args));
-}
-
-int	init(char *argv[], char **in_args, char **out_args, char *path_list[])
-{
-	int		pid;
-	int		fd[2];
-
-	if (pipe(fd) == -1)
-		return (return_perror());
-	pid = fork();
-	if (pid == -1)
-		return (return_perror());
-	else if (pid == 0)
-		return (child(path_list, in_args, argv[1], fd));
-	wait(NULL);
-	return (parent(path_list, out_args, argv[4], fd));
+	exec(args[3], envp);
 }
 
 int	main(int argc, char *argv[], char *envp[])
 {
-	int		i;
-	char	**in_args;
-	char	**out_args;
-	char	**path_list;
+	int		fd[2];
+	pid_t	pid;
 
-	i = 0;
-	if (argc != 5)
-		return (0);
-	path_list = get_path(envp);
-	if (!path_list)
-		return (1);
-	in_args = ft_split(argv[2], ' ');
-	if (!in_args)
-		return (free_double_ptr(path_list));
-	out_args = ft_split(argv[3], ' ');
-	if (!out_args)
+	if (argc == 5)
 	{
-		free_double_ptr(path_list);
-		return (free_double_ptr(in_args));
+		if (pipe(fd) == -1)
+			return (return_perror(-1));
+		pid = fork();
+		if (pid == -1)
+			return (return_perror(-1));
+		if (pid == 0)
+			child(argv, envp, fd);
+		wait(NULL);
+		parent(argv, envp, fd);
 	}
-	i = init(argv, in_args, out_args, path_list);
-	free_double_ptr(in_args);
-	free_double_ptr(out_args);
-	free_double_ptr(path_list);
-	return (i);
+	ft_putstr_fd("./pipex infile cmd1 cmd2 outfile\n", 2);
+	return (0);
 }
