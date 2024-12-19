@@ -6,7 +6,7 @@
 /*   By: dimatayi <dimatayi@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 00:44:51 by dimatayi          #+#    #+#             */
-/*   Updated: 2024/12/18 12:13:55 by dimatayi         ###   ########.fr       */
+/*   Updated: 2024/12/19 22:44:43 by dimatayi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,6 @@ void	child(char **args, char **envp, int fd[])
 	close(fd[0]);
 	if (access(args[1], R_OK) == -1)
 	{
-		ft_putstr_fd("bash: ", 2);
 		perror(args[1]);
 		exit (1);
 	}
@@ -62,12 +61,6 @@ void	parent(char **args, char **envp, int fd[])
 	int	oldfile;
 
 	close(fd[1]);
-	if (access(args[4], W_OK) == -1)
-	{
-		ft_putstr_fd("bash: ", 2);
-		perror(args[4]);
-		exit (1);
-	}
 	oldfile = open(args[4], O_WRONLY | O_CREAT | O_TRUNC, 0777);
 	dup2(oldfile, 1);
 	dup2(fd[0], 0);
@@ -80,7 +73,7 @@ int	main(int argc, char *argv[], char *envp[])
 	int		fd[2];
 	pid_t	pid;
 
-	if (argc == 5)
+	if (argc == 5 && *argv[2] && *argv[3])
 	{
 		if (pipe(fd) == -1)
 			return (return_perror(-1));

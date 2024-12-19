@@ -6,7 +6,7 @@
 /*   By: dimatayi <dimatayi@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 05:07:38 by dimatayi          #+#    #+#             */
-/*   Updated: 2024/12/18 11:51:35 by dimatayi         ###   ########.fr       */
+/*   Updated: 2024/12/19 22:44:37 by dimatayi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,6 @@ char	*build_cmd(char **split_path, char *cmd)
 			return (executable);
 		if (!split_path[i + 1])
 		{
-			ft_putstr_fd("bash: ", 2);
 			ft_putstr_fd(cmd, 2);
 			ft_putstr_fd(": command not found\n", 2);
 		}
