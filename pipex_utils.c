@@ -6,7 +6,7 @@
 /*   By: dimatayi <dimatayi@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 05:07:38 by dimatayi          #+#    #+#             */
-/*   Updated: 2024/12/19 22:44:37 by dimatayi         ###   ########.fr       */
+/*   Updated: 2024/12/20 23:12:39 by dimatayi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,4 +84,43 @@ char	*get_path(char *envp[], char *arg)
 	if (cmd == NULL)
 		return (ft_strdup("wrong_cmd"));
 	return (cmd);
+}
+
+char	**check_args(char **args)
+{
+	int		size;
+	int		j;
+	int		indicator;
+	char	*temp;
+	char	**cmd;
+
+	j = 0;
+	size = 0;
+	indicator = 0;
+	while (args[++size])
+	{
+		if (*args[size] == 39)
+			indicator = size;
+	}
+	size--;
+	while (args[size][j])
+		j++;
+	if (indicator && args[size][--j] == 39)
+	{
+		temp = ft_strjoin_double_ptr(size, &args[indicator], " ");
+		if (!temp)
+			return (NULL);
+		cmd = ft_calloc(3, sizeof(char *));
+		if (!cmd)
+		{
+			free(temp);
+			return (NULL);
+		}
+		cmd[0] = args[0];
+		cmd[1] = ft_strdup(temp + 1);
+		cmd[1][ft_strlen(cmd[1]) - 1] = '\0';
+		free(temp);
+		return (cmd);
+	}
+	return (args);
 }

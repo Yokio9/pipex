@@ -6,7 +6,7 @@
 /*   By: dimatayi <dimatayi@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 00:46:15 by dimatayi          #+#    #+#             */
-/*   Updated: 2024/12/18 12:19:06 by dimatayi         ###   ########.fr       */
+/*   Updated: 2024/12/20 18:56:39 by dimatayi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 # include <sys/syscall.h>
 # include "./libft/libft.h"
 
+char	**check_args(char **args);
 int		return_perror(int error);
 int		free_double_ptr(char **args);
 void	exec(char *cmd, char **envp);

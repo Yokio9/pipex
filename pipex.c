@@ -6,7 +6,7 @@
 /*   By: dimatayi <dimatayi@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 00:44:51 by dimatayi          #+#    #+#             */
-/*   Updated: 2024/12/19 22:44:43 by dimatayi         ###   ########.fr       */
+/*   Updated: 2024/12/20 22:37:17 by dimatayi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ void	exec(char *cmd, char **envp)
 	args = ft_split(cmd, ' ');
 	if (!args)
 		exit (1);
+	args = check_args(args);
 	full_path = get_path(envp, args[0]);
 	if (!full_path || !ft_strncmp(full_path, "wrong_cmd", 10))
 	{
