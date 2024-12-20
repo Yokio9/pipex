@@ -6,19 +6,13 @@
 /*   By: dimatayi <dimatayi@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 05:07:38 by dimatayi          #+#    #+#             */
-/*   Updated: 2024/12/20 23:12:39 by dimatayi         ###   ########.fr       */
+/*   Updated: 2024/12/21 00:15:49 by dimatayi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-int	return_perror(int error)
-{
-	perror("");
-	exit (error);
-}
-
-int	free_double_ptr(char **args)
+void	free_double_ptr(char **args)
 {
 	int	i;
 
@@ -29,7 +23,6 @@ int	free_double_ptr(char **args)
 		i++;
 	}
 	free(args);
-	return (1);
 }
 
 char	*build_cmd(char **split_path, char *cmd)
@@ -44,19 +37,19 @@ char	*build_cmd(char **split_path, char *cmd)
 	while (split_path[++i])
 	{
 		temp = ft_strjoin(split_path[i], "/");
+		if (!temp)
+			return (NULL);
 		executable = ft_strjoin(temp, cmd);
 		free(temp);
-		temp = NULL;
+		if (!executable)
+			return (NULL);
 		if (access(executable, F_OK | X_OK) == 0)
 			return (executable);
-		if (!split_path[i + 1])
-		{
-			ft_putstr_fd(cmd, 2);
-			ft_putstr_fd(": command not found\n", 2);
-		}
 		free(executable);
 		executable = NULL;
 	}
+	ft_putstr_fd(cmd, 2);
+	ft_putstr_fd(": command not found\n", 2);
 	return (NULL);
 }
 
@@ -86,13 +79,37 @@ char	*get_path(char *envp[], char *arg)
 	return (cmd);
 }
 
+char	**assemble(int size, int indicator, char **args)
+{
+	char	*temp;
+	char	**cmd;
+
+	temp = ft_table_join(size, &args[indicator], " ");
+	if (!temp)
+		return (NULL);
+	cmd = ft_calloc(3, sizeof(char *));
+	if (!cmd)
+	{
+		free(temp);
+		return (NULL);
+	}
+	cmd[0] = args[0];
+	cmd[1] = ft_strdup(temp + 1);
+	free(temp);
+	if (!cmd[1])
+	{
+		free(cmd[0]);
+		return (NULL);
+	}
+	cmd[1][ft_strlen(cmd[1]) - 1] = '\0';
+	return (cmd);
+}
+
 char	**check_args(char **args)
 {
 	int		size;
 	int		j;
 	int		indicator;
-	char	*temp;
-	char	**cmd;
 
 	j = 0;
 	size = 0;
@@ -106,21 +123,6 @@ char	**check_args(char **args)
 	while (args[size][j])
 		j++;
 	if (indicator && args[size][--j] == 39)
-	{
-		temp = ft_strjoin_double_ptr(size, &args[indicator], " ");
-		if (!temp)
-			return (NULL);
-		cmd = ft_calloc(3, sizeof(char *));
-		if (!cmd)
-		{
-			free(temp);
-			return (NULL);
-		}
-		cmd[0] = args[0];
-		cmd[1] = ft_strdup(temp + 1);
-		cmd[1][ft_strlen(cmd[1]) - 1] = '\0';
-		free(temp);
-		return (cmd);
-	}
+		return (assemble(size, indicator, args));
 	return (args);
 }

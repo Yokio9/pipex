@@ -1,18 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_strjoin_double_ptr.c                            :+:      :+:    :+:   */
+/*   ft_table_join.c                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: dimatayi <dimatayi@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/20 18:53:15 by dimatayi          #+#    #+#             */
-/*   Updated: 2024/12/20 21:24:18 by dimatayi         ###   ########.fr       */
+/*   Updated: 2024/12/20 23:34:22 by dimatayi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft/libft.h"
+#include "libft.h"
 
-char	*ft_strjoin_double_ptr(int size, char **strs, char *sep)
+char	*ft_table_join(int size, char **strs, char *sep)
 {
 	char	*s;
 	int		i;

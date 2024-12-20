@@ -6,7 +6,7 @@
 /*   By: dimatayi <dimatayi@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 00:44:51 by dimatayi          #+#    #+#             */
-/*   Updated: 2024/12/20 22:37:17 by dimatayi         ###   ########.fr       */
+/*   Updated: 2024/12/21 00:23:40 by dimatayi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,10 +77,16 @@ int	main(int argc, char *argv[], char *envp[])
 	if (argc == 5 && *argv[2] && *argv[3])
 	{
 		if (pipe(fd) == -1)
-			return (return_perror(-1));
+		{
+			perror("");
+			exit (-1);
+		}
 		pid = fork();
 		if (pid == -1)
-			return (return_perror(-1));
+		{
+			perror("");
+			exit (-1);
+		}
 		if (pid == 0)
 			child(argv, envp, fd);
 		wait(NULL);
